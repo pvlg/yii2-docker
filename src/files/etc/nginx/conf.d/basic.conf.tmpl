@@ -1,0 +1,38 @@
+server {
+    charset utf-8;
+    client_max_body_size 128M;
+
+    listen #APP_PORT#; ## listen for ipv4
+
+    server_name #APP_DOMAIN#;
+    root        #APP_ROOT#;
+    index       index.php;
+
+    access_log  /var/log/nginx/access.log;
+    error_log   /var/log/nginx/error.log;
+
+    set_real_ip_from    0.0.0.0/0;
+    real_ip_header      X-Real-IP;
+
+    location / {
+        # Redirect everything that isn't a real file to index.php
+        try_files $uri $uri/ /index.php?$args;
+    }
+
+    location ~ \.(js|css|png|jpg|gif|swf|ico|pdf|mov|fla|zip|rar)$ {
+        try_files $uri =404;
+    }
+    error_page 404 /404.html;
+
+    location ~ \.php$ {
+        include fastcgi_params;
+        fastcgi_param REMOTE_ADDR $http_x_real_ip;
+        fastcgi_param SCRIPT_FILENAME $document_root/$fastcgi_script_name;
+        fastcgi_pass   127.0.0.1:9000;
+        try_files $uri =404;
+    }
+
+    location ~ /\.(ht|svn|git) {
+        deny all;
+    }
+}

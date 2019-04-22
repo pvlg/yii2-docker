@@ -1,0 +1,16 @@
+<VirtualHost *:80>
+    DocumentRoot "#APP_ROOT#"
+
+    <Directory "#APP_ROOT#">
+        Options Indexes FollowSymLinks
+        AllowOverride All
+        Require all granted
+
+        RewriteEngine on
+        RewriteRule ^index.php/ - [L,R=404]
+        RewriteCond %{REQUEST_FILENAME} !-f
+        RewriteCond %{REQUEST_FILENAME} !-d
+        RewriteRule . index.php
+    </Directory>
+
+</VirtualHost>
