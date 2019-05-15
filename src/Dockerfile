@@ -13,6 +13,7 @@ RUN apt-get update && \
         php${PHP_INSTALL_VERSION}-fpm \
         php${PHP_INSTALL_VERSION}-mbstring \
         php${PHP_INSTALL_VERSION}-intl \
+        php${PHP_INSTALL_VERSION}-pgsql \
         php${PHP_INSTALL_VERSION}-mysql \
         php${PHP_INSTALL_VERSION}-sqlite3 \
         php${PHP_INSTALL_VERSION}-curl \
