@@ -91,7 +91,7 @@ if [[ "$1" = 'supervisor' ]]; then
     fi
 
     service nginx start
-    service php7.2-fpm start
+    service php${PHP_INSTALL_VERSION}-fpm start
     service ssh start
 
     /usr/bin/supervisord -c /etc/supervisor/supervisord.conf
