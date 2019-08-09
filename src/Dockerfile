@@ -20,6 +20,7 @@ RUN apt-get update && \
         php${PHP_INSTALL_VERSION}-gd \
         php${PHP_INSTALL_VERSION}-dom \
         php${PHP_INSTALL_VERSION}-zip \
+        php${PHP_INSTALL_VERSION}-bcmath \
         php-imagick \
         php-apcu \
         php-memcache \
@@ -32,6 +33,7 @@ RUN apt-get update && \
         openssh-server \
         git \
         less \
+        rsync \
         --no-install-recommends && \
         apt-get clean && \
         rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
