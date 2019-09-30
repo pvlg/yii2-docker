@@ -25,14 +25,18 @@ RUN apt-get update && \
         php-apcu \
         php-memcache \
         php-memcached \
+        php-xdebug
         wget \
         curl \
         supervisor \
         unzip \
         vim \
         openssh-server \
+        iputils-ping \
+        nmap \
         git \
         less \
+        sudo \
         rsync \
         --no-install-recommends && \
         apt-get clean && \
@@ -45,6 +49,14 @@ RUN sed -i '/\[supervisord\]/,/^$/s/^$/nodaemon=true\n/g' /etc/supervisor/superv
 RUN wget -O /usr/local/bin/gosu "https://github.com/tianon/gosu/releases/download/1.11/gosu-$(dpkg --print-architecture)" && \
     chmod +x /usr/local/bin/gosu
 
+# Install yarn
+RUN curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add - && \
+    echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list && \
+    apt-get update && \
+    apt-get install -y yarn && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
 # Install composer
 RUN curl -sS https://getcomposer.org/installer | php && \
     mv composer.phar /usr/local/bin/composer && \
@@ -54,6 +66,11 @@ RUN curl -sS https://getcomposer.org/installer | php && \
 
 # Configure php
 RUN sed -ri "s/listen = .*$/listen = 0.0.0.0:9000/" /etc/php/${PHP_INSTALL_VERSION}/fpm/pool.d/www.conf
+
+# Configure xdebug
+RUN echo "xdebug.remote_enable=1" >> /etc/php/${PHP_INSTALL_VERSION}/mods-available/xdebug.ini
+RUN echo "xdebug.remote_host=127.0.0.1" >> /etc/php/${PHP_INSTALL_VERSION}/mods-available/xdebug.ini
+RUN echo "xdebug.remote_port=9001" >> /etc/php/${PHP_INSTALL_VERSION}/mods-available/xdebug.ini
 
 # Configure ssh
 RUN chsh -s /bin/bash www-data && \
