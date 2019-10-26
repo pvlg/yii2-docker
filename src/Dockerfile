@@ -5,10 +5,10 @@ ENV PHP_INSTALL_VERSION ${PHP_INSTALL_VERSION}
 ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update && \
-    apt-get -y install software-properties-common && \
+    apt-get install -y software-properties-common && \
     LC_ALL=C.UTF-8 add-apt-repository -y ppa:ondrej/php && \
     apt-get update && \
-    apt-get -y install \
+    apt-get install -y \
         php${PHP_INSTALL_VERSION}-cli \
         php${PHP_INSTALL_VERSION}-fpm \
         php${PHP_INSTALL_VERSION}-mbstring \
@@ -25,7 +25,7 @@ RUN apt-get update && \
         php-apcu \
         php-memcache \
         php-memcached \
-        php-xdebug
+        php-xdebug \
         wget \
         curl \
         supervisor \
@@ -71,6 +71,7 @@ RUN sed -ri "s/listen = .*$/listen = 0.0.0.0:9000/" /etc/php/${PHP_INSTALL_VERSI
 RUN echo "xdebug.remote_enable=1" >> /etc/php/${PHP_INSTALL_VERSION}/mods-available/xdebug.ini
 RUN echo "xdebug.remote_host=127.0.0.1" >> /etc/php/${PHP_INSTALL_VERSION}/mods-available/xdebug.ini
 RUN echo "xdebug.remote_port=9001" >> /etc/php/${PHP_INSTALL_VERSION}/mods-available/xdebug.ini
+RUN echo "xdebug.overload_var_dump=0" >> /etc/php/${PHP_INSTALL_VERSION}/mods-available/xdebug.ini
 
 # Configure ssh
 RUN chsh -s /bin/bash www-data && \
