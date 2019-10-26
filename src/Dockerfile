@@ -68,10 +68,10 @@ RUN curl -sS https://getcomposer.org/installer | php && \
 RUN sed -ri "s/listen = .*$/listen = 0.0.0.0:9000/" /etc/php/${PHP_INSTALL_VERSION}/fpm/pool.d/www.conf
 
 # Configure xdebug
-RUN echo "xdebug.remote_enable=1" >> /etc/php/${PHP_INSTALL_VERSION}/mods-available/xdebug.ini
-RUN echo "xdebug.remote_host=127.0.0.1" >> /etc/php/${PHP_INSTALL_VERSION}/mods-available/xdebug.ini
-RUN echo "xdebug.remote_port=9001" >> /etc/php/${PHP_INSTALL_VERSION}/mods-available/xdebug.ini
-RUN echo "xdebug.overload_var_dump=0" >> /etc/php/${PHP_INSTALL_VERSION}/mods-available/xdebug.ini
+RUN echo "xdebug.remote_enable=1" >> /etc/php/${PHP_INSTALL_VERSION}/mods-available/xdebug.ini && \
+    echo "xdebug.remote_host=127.0.0.1" >> /etc/php/${PHP_INSTALL_VERSION}/mods-available/xdebug.ini && \
+    echo "xdebug.remote_port=9001" >> /etc/php/${PHP_INSTALL_VERSION}/mods-available/xdebug.ini && \
+    echo "xdebug.overload_var_dump=0" >> /etc/php/${PHP_INSTALL_VERSION}/mods-available/xdebug.ini
 
 # Configure ssh
 RUN chsh -s /bin/bash www-data && \
