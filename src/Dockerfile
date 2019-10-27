@@ -26,6 +26,7 @@ RUN apt-get update && \
         php-memcache \
         php-memcached \
         php-xdebug \
+        webp \
         wget \
         curl \
         supervisor \
