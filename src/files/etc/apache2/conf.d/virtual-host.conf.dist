@@ -1,7 +1,9 @@
-<VirtualHost *:80>
-    DocumentRoot "#APP_ROOT#"
+Listen #PORT#
+<VirtualHost *:#PORT#>
+    DocumentRoot "#ROOT#"
+    ServerName #HOST#
 
-    <Directory "#APP_ROOT#">
+    <Directory "#ROOT#">
         Options Indexes FollowSymLinks
         AllowOverride All
         Require all granted
@@ -12,5 +14,4 @@
         RewriteCond %{REQUEST_FILENAME} !-d
         RewriteRule . index.php
     </Directory>
-
 </VirtualHost>

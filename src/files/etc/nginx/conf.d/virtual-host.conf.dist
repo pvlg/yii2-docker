@@ -2,10 +2,10 @@ server {
     charset utf-8;
     client_max_body_size 128M;
 
-    listen #APP_PORT#; ## listen for ipv4
+    listen #PORT#; ## listen for ipv4
 
-    server_name #APP_DOMAIN#;
-    root        #APP_ROOT#;
+    server_name #HOST#;
+    root        #ROOT#;
     index       index.php;
 
     access_log  /var/log/nginx/access.log;

@@ -84,12 +84,13 @@ COPY files /
 
 WORKDIR /data
 
-EXPOSE 80 443 22
-
 CMD ["supervisor"]
 ENTRYPOINT ["/docker-entrypoint.sh"]
 
+# Build nginx
 FROM stage as nginx
+
+ENV HTTP_SERVER=nginx
 
 RUN apt-get update && \
     apt-get -y install \
@@ -102,10 +103,10 @@ RUN apt-get update && \
 RUN rm /etc/nginx/sites-enabled/default && \
     rm /etc/nginx/sites-available/default
 
-COPY ./docker-entrypoint.nginx.sh /docker-entrypoint.sh
-RUN chmod +x /docker-entrypoint.sh
-
+# Build apache
 FROM stage as apache
+
+ENV HTTP_SERVER=apache2
 
 RUN apt-get update && \
     apt-get -y install \
@@ -117,7 +118,5 @@ RUN apt-get update && \
 
 # Configure apache
 RUN a2enmod rewrite && \
-    rm /etc/apache2/sites-enabled/000-default.conf
-
-COPY ./docker-entrypoint.apache.sh /docker-entrypoint.sh
-RUN chmod +x /docker-entrypoint.sh
+    rm /etc/apache2/sites-enabled/000-default.conf && \
+    echo "IncludeOptional conf.d/*.conf" >> /etc/apache2/apache2.conf
