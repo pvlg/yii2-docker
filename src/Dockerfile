@@ -84,6 +84,8 @@ COPY files /
 
 WORKDIR /data
 
+EXPOSE 80 22
+
 CMD ["supervisor"]
 ENTRYPOINT ["/docker-entrypoint.sh"]
 
