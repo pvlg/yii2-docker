@@ -35,10 +35,10 @@ if [[ "$1" == 'supervisor' ]]; then
   fi
   echo "root:${ROOT_PASSWORD}" | chpasswd
 
-  if [[ -z "${WWW-DATA_PASSWORD}" ]]; then
-    WWW-DATA_PASSWORD='www-data'
+  if [[ -z "${WWW_DATA_PASSWORD}" ]]; then
+    WWW_DATA_PASSWORD='www-data'
   fi
-  echo "www-data:${WWW-DATA_PASSWORD}" | chpasswd
+  echo "www-data:${WWW_DATA_PASSWORD}" | chpasswd
 
   if [[ "${YII_APP_TEMPLATE}" == 'basic' ]]; then
     echo "Enabled basic template"
