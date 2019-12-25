@@ -40,7 +40,7 @@ if [[ "$1" == 'supervisor' ]]; then
   fi
   echo "www-data:${WWW_DATA_PASSWORD}" | chpasswd
 
-  if [[ "${YII_APP_TEMPLATE}" == 'basic' ]]; then
+  if [[ "${YII_TEMPLATE}" == 'basic' ]]; then
     echo "Enabled basic template"
 
     if [[ -z "${APP_HOST}" ]]; then
@@ -61,41 +61,41 @@ if [[ "$1" == 'supervisor' ]]; then
       echo "Install basic template"
       gosu www-data composer create-project --prefer-dist yiisoft/yii2-app-basic /data
     fi
-  elif [[ "${YII_APP_TEMPLATE}" == 'advanced' ]]; then
+  elif [[ "${YII_TEMPLATE}" == 'advanced' ]]; then
     echo "Enabled advanced template"
 
     # App frontend
-    if [[ -z "${APP_FRONTEND_HOST}" ]]; then
-      APP_FRONTEND_HOST='_'
+    if [[ -z "${FRONTEND_HOST}" ]]; then
+      FRONTEND_HOST='_'
     fi
 
-    if [[ -z "${APP_FRONTEND_PORT}" ]]; then
-      APP_FRONTEND_PORT='80'
+    if [[ -z "${FRONTEND_PORT}" ]]; then
+      FRONTEND_PORT='80'
     fi
 
-    if [[ -z "${APP_FRONTEND_ROOT}" ]]; then
-      APP_FRONTEND_ROOT='/data/frontend/web'
+    if [[ -z "${FRONTEND_ROOT}" ]]; then
+      FRONTEND_ROOT='/data/frontend/web'
     fi
 
     # App backend
-    if [[ -z "${APP_BACKEND_HOST}" ]]; then
-      APP_BACKEND_HOST='_'
+    if [[ -z "${BACKEND_HOST}" ]]; then
+      BACKEND_HOST='_'
     fi
 
-    if [[ -z "${APP_BACKEND_PORT}" ]]; then
-      if [ "${APP_BACKEND_HOST}" == "_" ]; then
-        APP_BACKEND_PORT='81'
+    if [[ -z "${BACKEND_PORT}" ]]; then
+      if [ "${BACKEND_HOST}" == "_" ]; then
+        BACKEND_PORT='81'
       else
-        APP_BACKEND_PORT='80'
+        BACKEND_PORT='80'
       fi
     fi
 
-    if [[ -z "${APP_BACKEND_ROOT}" ]]; then
-      APP_BACKEND_ROOT='/data/backend/web'
+    if [[ -z "${BACKEND_ROOT}" ]]; then
+      BACKEND_ROOT='/data/backend/web'
     fi
 
-    configure-vurtual-host frontend ${APP_FRONTEND_HOST} ${APP_FRONTEND_PORT} ${APP_FRONTEND_ROOT}
-    configure-vurtual-host backend ${APP_BACKEND_HOST} ${APP_BACKEND_PORT} ${APP_BACKEND_ROOT}
+    configure-vurtual-host frontend ${FRONTEND_HOST} ${FRONTEND_PORT} ${FRONTEND_ROOT}
+    configure-vurtual-host backend ${BACKEND_HOST} ${BACKEND_PORT} ${BACKEND_ROOT}
 
     if [[ "$YII_INSTALL_TEMPLATE" == true ]] && [[ ! "$(ls -A /data)" ]]; then
       echo "Install advanced template"
@@ -104,14 +104,14 @@ if [[ "$1" == 'supervisor' ]]; then
     fi
   fi
 
-  if [ -n "${APP_CUSTOM_1_HOST}" ] && [ -n "${APP_CUSTOM_1_PORT}" ] && [ -n "${APP_CUSTOM_1_ROOT}" ]; then
-    configure-vurtual-host custom_1 "${APP_CUSTOM_1_HOST}" "${APP_CUSTOM_1_PORT}" "${APP_CUSTOM_1_ROOT}"
+  if [ -n "${CUSTOM_1_HOST}" ] && [ -n "${CUSTOM_1_PORT}" ] && [ -n "${CUSTOM_1_ROOT}" ]; then
+    configure-vurtual-host custom_1 "${CUSTOM_1_HOST}" "${CUSTOM_1_PORT}" "${CUSTOM_1_ROOT}"
   fi
-  if [ -n "${APP_CUSTOM_2_HOST}" ] && [ -n "${APP_CUSTOM_2_PORT}" ] && [ -n "${APP_CUSTOM_2_ROOT}" ]; then
-    configure-vurtual-host custom_2 "${APP_CUSTOM_2_HOST}" "${APP_CUSTOM_2_PORT}" "${APP_CUSTOM_2_ROOT}"
+  if [ -n "${CUSTOM_2_HOST}" ] && [ -n "${CUSTOM_2_PORT}" ] && [ -n "${CUSTOM_2_ROOT}" ]; then
+    configure-vurtual-host custom_2 "${CUSTOM_2_HOST}" "${CUSTOM_2_PORT}" "${CUSTOM_2_ROOT}"
   fi
-  if [ -n "${APP_CUSTOM_3_HOST}" ] && [ -n "${APP_CUSTOM_3_PORT}" ] && [ -n "${APP_CUSTOM_3_ROOT}" ]; then
-    configure-vurtual-host custom_3 "${APP_CUSTOM_3_HOST}" "${APP_CUSTOM_3_PORT}" "${APP_CUSTOM_3_ROOT}"
+  if [ -n "${CUSTOM_3_HOST}" ] && [ -n "${CUSTOM_3_PORT}" ] && [ -n "${CUSTOM_3_ROOT}" ]; then
+    configure-vurtual-host custom_3 "${CUSTOM_3_HOST}" "${CUSTOM_3_PORT}" "${CUSTOM_3_ROOT}"
   fi
 
   service "${HTTP_SERVER}" start
