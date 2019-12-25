@@ -3,10 +3,11 @@ FROM ubuntu:18.04 as stage
 ARG PHP_INSTALL_VERSION
 ENV PHP_INSTALL_VERSION ${PHP_INSTALL_VERSION}
 ENV DEBIAN_FRONTEND=noninteractive
+ENV LANG C.UTF-8
 
 RUN apt-get update && \
     apt-get install -y software-properties-common && \
-    LC_ALL=C.UTF-8 add-apt-repository -y ppa:ondrej/php && \
+    add-apt-repository -y ppa:ondrej/php && \
     apt-get update && \
     apt-get install -y \
         php${PHP_INSTALL_VERSION}-cli \
