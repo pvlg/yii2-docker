@@ -2,7 +2,7 @@
 
 set -e
 
-function configure-vurtual-host() {
+function configure-virtual-host() {
   local NAME=$1
   local HOST=$2
   local PORT=$3
@@ -27,8 +27,18 @@ function configure-vurtual-host() {
 }
 
 if [[ "$1" == 'supervisor' ]]; then
-  chown www-data:www-data /data
-  chown -R www-data:www-data /var/www
+  # If local volume mounted then change uid and gid for www-data
+  if [[ -d "/data" ]]; then
+    if [[ "$(stat -c "%u" /data)" != '0' && "$(stat -c "%u" /data)" != "$(id -u www-data)" ]]; then
+      usermod -u "$(stat -c "%u" /data)" www-data
+      groupmod -g "$(stat -c "%g" /data)" www-data
+    fi
+  fi
+
+  # If new docker volume mounted then change user and group
+  if [ "$(stat -c "%u" /data)" != "$(id -u www-data)" ]; then
+    chown -R www-data:www-data /data
+  fi
 
   if [[ -z "${ROOT_PASSWORD}" ]]; then
     ROOT_PASSWORD='root'
@@ -55,7 +65,7 @@ if [[ "$1" == 'supervisor' ]]; then
       APP_ROOT='/data/web'
     fi
 
-    configure-vurtual-host basic ${APP_HOST} ${APP_PORT} ${APP_ROOT}
+    configure-virtual-host basic ${APP_HOST} ${APP_PORT} ${APP_ROOT}
 
     if [[ "$YII_INSTALL_TEMPLATE" == true ]] && [[ ! "$(ls -A /data)" ]]; then
       echo "Install basic template"
@@ -94,8 +104,8 @@ if [[ "$1" == 'supervisor' ]]; then
       BACKEND_ROOT='/data/backend/web'
     fi
 
-    configure-vurtual-host frontend ${FRONTEND_HOST} ${FRONTEND_PORT} ${FRONTEND_ROOT}
-    configure-vurtual-host backend ${BACKEND_HOST} ${BACKEND_PORT} ${BACKEND_ROOT}
+    configure-virtual-host frontend ${FRONTEND_HOST} ${FRONTEND_PORT} ${FRONTEND_ROOT}
+    configure-virtual-host backend ${BACKEND_HOST} ${BACKEND_PORT} ${BACKEND_ROOT}
 
     if [[ "$YII_INSTALL_TEMPLATE" == true ]] && [[ ! "$(ls -A /data)" ]]; then
       echo "Install advanced template"
@@ -105,13 +115,13 @@ if [[ "$1" == 'supervisor' ]]; then
   fi
 
   if [ -n "${CUSTOM_1_HOST}" ] && [ -n "${CUSTOM_1_PORT}" ] && [ -n "${CUSTOM_1_ROOT}" ]; then
-    configure-vurtual-host custom_1 "${CUSTOM_1_HOST}" "${CUSTOM_1_PORT}" "${CUSTOM_1_ROOT}"
+    configure-virtual-host custom_1 "${CUSTOM_1_HOST}" "${CUSTOM_1_PORT}" "${CUSTOM_1_ROOT}"
   fi
   if [ -n "${CUSTOM_2_HOST}" ] && [ -n "${CUSTOM_2_PORT}" ] && [ -n "${CUSTOM_2_ROOT}" ]; then
-    configure-vurtual-host custom_2 "${CUSTOM_2_HOST}" "${CUSTOM_2_PORT}" "${CUSTOM_2_ROOT}"
+    configure-virtual-host custom_2 "${CUSTOM_2_HOST}" "${CUSTOM_2_PORT}" "${CUSTOM_2_ROOT}"
   fi
   if [ -n "${CUSTOM_3_HOST}" ] && [ -n "${CUSTOM_3_PORT}" ] && [ -n "${CUSTOM_3_ROOT}" ]; then
-    configure-vurtual-host custom_3 "${CUSTOM_3_HOST}" "${CUSTOM_3_PORT}" "${CUSTOM_3_ROOT}"
+    configure-virtual-host custom_3 "${CUSTOM_3_HOST}" "${CUSTOM_3_PORT}" "${CUSTOM_3_ROOT}"
   fi
 
   service "${HTTP_SERVER}" start

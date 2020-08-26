@@ -1,5 +1,3 @@
-PHP_VERSION=7.2
-HTTP_SERVER=nginx
 build:
 	docker build --build-arg PHP_INSTALL_VERSION=$(PHP_VERSION) --target $(HTTP_SERVER) -t pvlg/yii2:php$(PHP_VERSION)-$(HTTP_SERVER) src
 
