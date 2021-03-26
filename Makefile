@@ -1,20 +1,20 @@
 build:
-	docker build --build-arg PHP_INSTALL_VERSION=$(PHP_VERSION) --target $(HTTP_SERVER) -t pvlg/yii2:php$(PHP_VERSION)-$(HTTP_SERVER) src
+	docker build --build-arg PHP_VERSION=$(PHP_VERSION) --target $(HTTP_SERVER) -t pvlg/yii2:php$(PHP_VERSION)-$(HTTP_SERVER) src
 
 push:
 	docker push pvlg/yii2:php$(PHP_VERSION)-$(HTTP_SERVER)
 
 build-all:
-	docker build --build-arg PHP_INSTALL_VERSION=5.6 --target nginx -t pvlg/yii2:php5.6-nginx src
-	docker build --build-arg PHP_INSTALL_VERSION=7.0 --target nginx -t pvlg/yii2:php7.0-nginx src
-	docker build --build-arg PHP_INSTALL_VERSION=7.1 --target nginx -t pvlg/yii2:php7.1-nginx src
-	docker build --build-arg PHP_INSTALL_VERSION=7.2 --target nginx -t pvlg/yii2:php7.2-nginx src
-	docker build --build-arg PHP_INSTALL_VERSION=7.3 --target nginx -t pvlg/yii2:php7.3-nginx src
-	docker build --build-arg PHP_INSTALL_VERSION=5.6 --target apache -t pvlg/yii2:php5.6-apache src
-	docker build --build-arg PHP_INSTALL_VERSION=7.0 --target apache -t pvlg/yii2:php7.0-apache src
-	docker build --build-arg PHP_INSTALL_VERSION=7.1 --target apache -t pvlg/yii2:php7.1-apache src
-	docker build --build-arg PHP_INSTALL_VERSION=7.2 --target apache -t pvlg/yii2:php7.2-apache src
-	docker build --build-arg PHP_INSTALL_VERSION=7.3 --target apache -t pvlg/yii2:php7.3-apache src
+	docker build --build-arg PHP_VERSION=5.6 --target nginx -t pvlg/yii2:php5.6-nginx src
+	docker build --build-arg PHP_VERSION=7.0 --target nginx -t pvlg/yii2:php7.0-nginx src
+	docker build --build-arg PHP_VERSION=7.1 --target nginx -t pvlg/yii2:php7.1-nginx src
+	docker build --build-arg PHP_VERSION=7.2 --target nginx -t pvlg/yii2:php7.2-nginx src
+	docker build --build-arg PHP_VERSION=7.3 --target nginx -t pvlg/yii2:php7.3-nginx src
+	docker build --build-arg PHP_VERSION=5.6 --target apache -t pvlg/yii2:php5.6-apache src
+	docker build --build-arg PHP_VERSION=7.0 --target apache -t pvlg/yii2:php7.0-apache src
+	docker build --build-arg PHP_VERSION=7.1 --target apache -t pvlg/yii2:php7.1-apache src
+	docker build --build-arg PHP_VERSION=7.2 --target apache -t pvlg/yii2:php7.2-apache src
+	docker build --build-arg PHP_VERSION=7.3 --target apache -t pvlg/yii2:php7.3-apache src
 
 push-all:
 	docker push pvlg/yii2:php5.6-nginx

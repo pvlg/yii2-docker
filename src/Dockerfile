@@ -1,32 +1,33 @@
-FROM ubuntu:18.04 as stage
+FROM ubuntu:20.04 as stage
 
-ARG PHP_INSTALL_VERSION
-ENV PHP_INSTALL_VERSION ${PHP_INSTALL_VERSION}
+ARG PHP_VERSION
+ENV PHP_VERSION=${PHP_VERSION}
 ENV DEBIAN_FRONTEND=noninteractive
-ENV LANG C.UTF-8
+ENV YII_TEMPLATE=basic
+ENV LANG=C.UTF-8
 
 RUN apt-get update && \
     apt-get install -y software-properties-common && \
     add-apt-repository -y ppa:ondrej/php && \
     apt-get update && \
     apt-get install -y \
-        php${PHP_INSTALL_VERSION}-cli \
-        php${PHP_INSTALL_VERSION}-fpm \
-        php${PHP_INSTALL_VERSION}-mbstring \
-        php${PHP_INSTALL_VERSION}-intl \
-        php${PHP_INSTALL_VERSION}-pgsql \
-        php${PHP_INSTALL_VERSION}-mysql \
-        php${PHP_INSTALL_VERSION}-sqlite3 \
-        php${PHP_INSTALL_VERSION}-curl \
-        php${PHP_INSTALL_VERSION}-gd \
-        php${PHP_INSTALL_VERSION}-dom \
-        php${PHP_INSTALL_VERSION}-zip \
-        php${PHP_INSTALL_VERSION}-bcmath \
-        php-imagick \
-        php-apcu \
-        php-memcache \
-        php-memcached \
-        php-xdebug \
+        php${PHP_VERSION}-cli \
+        php${PHP_VERSION}-fpm \
+        php${PHP_VERSION}-mbstring \
+        php${PHP_VERSION}-intl \
+        php${PHP_VERSION}-pgsql \
+        php${PHP_VERSION}-mysql \
+        php${PHP_VERSION}-sqlite3 \
+        php${PHP_VERSION}-curl \
+        php${PHP_VERSION}-gd \
+        php${PHP_VERSION}-dom \
+        php${PHP_VERSION}-zip \
+        php${PHP_VERSION}-bcmath \
+        php${PHP_VERSION}-imagick \
+        php${PHP_VERSION}-apcu \
+        php${PHP_VERSION}-memcache \
+        php${PHP_VERSION}-memcached \
+        php${PHP_VERSION}-xdebug \
         webp \
         wget \
         curl \
@@ -39,6 +40,7 @@ RUN apt-get update && \
         git \
         less \
         sudo \
+        cron \
         rsync \
         --no-install-recommends && \
         apt-get clean && \
@@ -51,29 +53,34 @@ RUN sed -i '/\[supervisord\]/,/^$/s/^$/nodaemon=true\n/g' /etc/supervisor/superv
 RUN wget -O /usr/local/bin/gosu "https://github.com/tianon/gosu/releases/download/1.11/gosu-$(dpkg --print-architecture)" && \
     chmod +x /usr/local/bin/gosu
 
+# Install nodejs
+RUN curl -sL https://deb.nodesource.com/setup_14.x | bash - && \
+    apt-get install -y nodejs && \
+    rm -rf /var/lib/apt/lists/*
+
 # Install yarn
 RUN curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add - && \
     echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list && \
     apt-get update && \
-    apt-get install -y yarn && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+    apt-get install -y --no-install-recommends yarn && \
+    rm -rf /var/lib/apt/lists/*
 
 # Install composer
-RUN curl -sS https://getcomposer.org/installer | php && \
-    mv composer.phar /usr/local/bin/composer && \
+RUN wget -O /usr/local/bin/composer "https://github.com/composer/composer/releases/download/1.10.20/composer.phar" && \
+    chmod +x /usr/local/bin/composer && \
     mkdir -p /var/www && \
     chown -R www-data:www-data /var/www && \
     gosu www-data composer global require "fxp/composer-asset-plugin:~1.3"
 
 # Configure php
-RUN sed -ri "s/listen = .*$/listen = 0.0.0.0:9000/" /etc/php/${PHP_INSTALL_VERSION}/fpm/pool.d/www.conf
+RUN mkdir /run/php && \
+    sed -ri "s/listen = .*$/listen = 0.0.0.0:9000/" /etc/php/${PHP_VERSION}/fpm/pool.d/www.conf && \
+    echo "env[PHP_IDE_CONFIG] = \$PHP_IDE_CONFIG" >> /etc/php/${PHP_VERSION}/fpm/pool.d/www.conf
 
 # Configure xdebug
-RUN echo "xdebug.remote_enable=1" >> /etc/php/${PHP_INSTALL_VERSION}/mods-available/xdebug.ini && \
-    echo "xdebug.remote_host=127.0.0.1" >> /etc/php/${PHP_INSTALL_VERSION}/mods-available/xdebug.ini && \
-    echo "xdebug.remote_port=9001" >> /etc/php/${PHP_INSTALL_VERSION}/mods-available/xdebug.ini && \
-    echo "xdebug.overload_var_dump=0" >> /etc/php/${PHP_INSTALL_VERSION}/mods-available/xdebug.ini
+#RUN echo "xdebug.remote_enable=1" >> /etc/php/${PHP_VERSION}/mods-available/xdebug.ini && \
+#    echo "xdebug.remote_host=host.docker.internal" >> /etc/php/${PHP_VERSION}/mods-available/xdebug.ini && \
+#    echo "xdebug.remote_port=9001" >> /etc/php/${PHP_VERSION}/mods-available/xdebug.ini
 
 # Configure ssh
 RUN chsh -s /bin/bash www-data && \
@@ -83,6 +90,7 @@ RUN chsh -s /bin/bash www-data && \
 
 COPY files /
 
+VOLUME /data
 WORKDIR /data
 
 EXPOSE 80 22
@@ -114,7 +122,7 @@ ENV HTTP_SERVER=apache2
 RUN apt-get update && \
     apt-get -y install \
         apache2 \
-        libapache2-mod-php${PHP_INSTALL_VERSION} \
+        libapache2-mod-php${PHP_VERSION} \
         --no-install-recommends && \
         apt-get clean && \
         rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*

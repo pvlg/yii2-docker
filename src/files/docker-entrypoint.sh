@@ -2,6 +2,9 @@
 
 set -e
 
+echo "${YII_INSTALL_TEMPLATE}"
+echo "${YII_TEMPLATE}"
+
 function configure-virtual-host() {
   local NAME=$1
   local HOST=$2
@@ -27,9 +30,13 @@ function configure-virtual-host() {
 }
 
 if [[ "$1" == 'supervisor' ]]; then
+  echo "Starting"
+
   # If local volume mounted then change uid and gid for www-data
   if [[ -d "/data" ]]; then
     if [[ "$(stat -c "%u" /data)" != '0' && "$(stat -c "%u" /data)" != "$(id -u www-data)" ]]; then
+      echo "Change uid and gid for www-data"
+
       usermod -u "$(stat -c "%u" /data)" www-data
       groupmod -g "$(stat -c "%g" /data)" www-data
     fi
@@ -37,6 +44,8 @@ if [[ "$1" == 'supervisor' ]]; then
 
   # If new docker volume mounted then change user and group
   if [ "$(stat -c "%u" /data)" != "$(id -u www-data)" ]; then
+    echo "Change owners"
+
     chown -R www-data:www-data /data
   fi
 
@@ -50,11 +59,13 @@ if [[ "$1" == 'supervisor' ]]; then
   fi
   echo "www-data:${WWW_DATA_PASSWORD}" | chpasswd
 
+  echo "Select template"
+
   if [[ "${YII_TEMPLATE}" == 'basic' ]]; then
     echo "Enabled basic template"
 
     if [[ -z "${APP_HOST}" ]]; then
-      APP_HOST='_'
+      APP_HOST='localhost'
     fi
 
     if [[ -z "${APP_PORT}" ]]; then
@@ -67,7 +78,7 @@ if [[ "$1" == 'supervisor' ]]; then
 
     configure-virtual-host basic ${APP_HOST} ${APP_PORT} ${APP_ROOT}
 
-    if [[ "$YII_INSTALL_TEMPLATE" == true ]] && [[ ! "$(ls -A /data)" ]]; then
+    if [[ "$YII_INSTALL_TEMPLATE" == 1 ]] && [[ ! "$(ls -A /data)" ]]; then
       echo "Install basic template"
       gosu www-data composer create-project --prefer-dist yiisoft/yii2-app-basic /data
     fi
@@ -75,60 +86,59 @@ if [[ "$1" == 'supervisor' ]]; then
     echo "Enabled advanced template"
 
     # App frontend
-    if [[ -z "${FRONTEND_HOST}" ]]; then
-      FRONTEND_HOST='_'
+    if [[ -z "${APP_FRONTEND_HOST}" ]]; then
+      APP_FRONTEND_HOST='localhost'
     fi
 
-    if [[ -z "${FRONTEND_PORT}" ]]; then
-      FRONTEND_PORT='80'
+    if [[ -z "${APP_FRONTEND_PORT}" ]]; then
+      APP_FRONTEND_PORT='80'
     fi
 
-    if [[ -z "${FRONTEND_ROOT}" ]]; then
-      FRONTEND_ROOT='/data/frontend/web'
+    if [[ -z "${APP_FRONTEND_ROOT}" ]]; then
+      APP_FRONTEND_ROOT='/data/frontend/web'
     fi
 
     # App backend
-    if [[ -z "${BACKEND_HOST}" ]]; then
-      BACKEND_HOST='_'
+    if [[ -z "${APP_BACKEND_HOST}" ]]; then
+      APP_BACKEND_HOST='localhost'
     fi
 
-    if [[ -z "${BACKEND_PORT}" ]]; then
-      if [ "${BACKEND_HOST}" == "_" ]; then
-        BACKEND_PORT='81'
+    if [[ -z "${APP_BACKEND_PORT}" ]]; then
+      if [ "${APP_BACKEND_HOST}" == "localhost" ]; then
+        APP_BACKEND_PORT='81'
       else
-        BACKEND_PORT='80'
+        APP_BACKEND_PORT='80'
       fi
     fi
 
-    if [[ -z "${BACKEND_ROOT}" ]]; then
-      BACKEND_ROOT='/data/backend/web'
+    if [[ -z "${APP_BACKEND_ROOT}" ]]; then
+      APP_BACKEND_ROOT='/data/backend/web'
     fi
 
-    configure-virtual-host frontend ${FRONTEND_HOST} ${FRONTEND_PORT} ${FRONTEND_ROOT}
-    configure-virtual-host backend ${BACKEND_HOST} ${BACKEND_PORT} ${BACKEND_ROOT}
+    configure-virtual-host frontend ${APP_FRONTEND_HOST} ${APP_FRONTEND_PORT} ${APP_FRONTEND_ROOT}
+    configure-virtual-host backend ${APP_BACKEND_HOST} ${APP_BACKEND_PORT} ${APP_BACKEND_ROOT}
 
-    if [[ "$YII_INSTALL_TEMPLATE" == true ]] && [[ ! "$(ls -A /data)" ]]; then
+    if [[ "$YII_INSTALL_TEMPLATE" == 1 ]] && [[ ! "$(ls -A /data)" ]]; then
       echo "Install advanced template"
       gosu www-data composer create-project --prefer-dist yiisoft/yii2-app-advanced /data
       gosu www-data php init --env=Development
     fi
   fi
 
-  if [ -n "${CUSTOM_1_HOST}" ] && [ -n "${CUSTOM_1_PORT}" ] && [ -n "${CUSTOM_1_ROOT}" ]; then
-    configure-virtual-host custom_1 "${CUSTOM_1_HOST}" "${CUSTOM_1_PORT}" "${CUSTOM_1_ROOT}"
+  if [ -n "${APP_EXT_1_HOST}" ] && [ -n "${APP_EXT_1_PORT}" ] && [ -n "${APP_EXT_1_ROOT}" ]; then
+    configure-virtual-host app_ext_1 "${APP_EXT_1_HOST}" "${APP_EXT_1_PORT}" "${APP_EXT_1_ROOT}"
   fi
-  if [ -n "${CUSTOM_2_HOST}" ] && [ -n "${CUSTOM_2_PORT}" ] && [ -n "${CUSTOM_2_ROOT}" ]; then
-    configure-virtual-host custom_2 "${CUSTOM_2_HOST}" "${CUSTOM_2_PORT}" "${CUSTOM_2_ROOT}"
+  if [ -n "${APP_EXT_2_HOST}" ] && [ -n "${APP_EXT_2_PORT}" ] && [ -n "${APP_EXT_2_ROOT}" ]; then
+    configure-virtual-host app_ext_2 "${APP_EXT_2_HOST}" "${APP_EXT_2_PORT}" "${APP_EXT_2_ROOT}"
   fi
-  if [ -n "${CUSTOM_3_HOST}" ] && [ -n "${CUSTOM_3_PORT}" ] && [ -n "${CUSTOM_3_ROOT}" ]; then
-    configure-virtual-host custom_3 "${CUSTOM_3_HOST}" "${CUSTOM_3_PORT}" "${CUSTOM_3_ROOT}"
+  if [ -n "${APP_EXT_3_HOST}" ] && [ -n "${APP_EXT_3_PORT}" ] && [ -n "${APP_EXT_3_ROOT}" ]; then
+    configure-virtual-host app_ext_3 "${APP_EXT_3_HOST}" "${APP_EXT_3_PORT}" "${APP_EXT_3_ROOT}"
   fi
 
   service "${HTTP_SERVER}" start
-  service php"${PHP_INSTALL_VERSION}"-fpm start
   service ssh start
 
-  /usr/bin/supervisord -c /etc/supervisor/supervisord.conf
+  exec /usr/bin/supervisord -c /etc/supervisor/supervisord.conf
 fi
 
 exec "$@"
